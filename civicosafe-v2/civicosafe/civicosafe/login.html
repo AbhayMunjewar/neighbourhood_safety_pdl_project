@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Civicosafe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #252525;
+            --card: #ffffff;
+            --border: rgba(0, 0, 0, 0.1);
+            --primary: #030213;
+            --primary-foreground: #ffffff;
+            --muted: #ececf0;
+            --muted-foreground: #717182;
+            --input-background: #f3f3f5;
+            --destructive: #d4183d;
+            --radius: 0.625rem;
+        }
+
+        .dark {
+            --background: #252525;
+            --foreground: #fafafa;
+            --card: #252525;
+            --border: #454545;
+            --primary: #fafafa;
+            --primary-foreground: #343434;
+            --muted: #454545;
+            --muted-foreground: #b5b5b5;
+            --input-background: #454545;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(to bottom right, var(--background), var(--muted));
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 28rem;
+        }
+
+        .header-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            margin-bottom: 1rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--muted-foreground);
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+
+        .tabs {
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            background: var(--muted);
+            padding: 0.25rem;
+            border-radius: var(--radius);
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--muted-foreground);
+            cursor: pointer;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            background: var(--background);
+            color: var(--foreground);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: var(--muted-foreground);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+            background: var(--input-background);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) - 0.25rem);
+            color: var(--foreground);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            color: var(--muted-foreground);
+        }
+
+        input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.625rem 1rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .terms {
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .terms input {
+            margin-top: 0.25rem;
+        }
+
+        .terms-text {
+            color: var(--muted-foreground);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <div class="logo-circle">
+                <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <h1>Civicosafe</h1>
+            <p class="subtitle">Community Safety Management</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Welcome</h2>
+                <p class="card-description">Sign in to your account or create a new one</p>
+            </div>
+
+            <div class="tabs">
+                <div class="tab-list">
+                    <button class="tab-button active" onclick="switchTab('login')">Login</button>
+                    <button class="tab-button" onclick="switchTab('signup')">Sign Up</button>
+                </div>
+
+                <!-- Login Tab -->
+                <div id="login-tab" class="tab-content active" style="margin-top: 1.5rem;">
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="login-type">Login As *</label>
+                            <select id="login-type" required style="width: 100%; padding: 0.5rem 0.75rem; background: var(--input-background); border: 1px solid var(--border); border-radius: calc(var(--radius) - 0.25rem); color: var(--foreground); font-size: 0.875rem; font-family: inherit;">
+                                <option value="">Select login type</option>
+                                <option value="resident">Resident</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                                <input type="email" id="login-email" placeholder="john@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="login-password">Password</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <input type="password" id="login-password" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="form-footer">
+                            <label class="checkbox-label">
+                                <input type="checkbox">
+                                <span>Remember me</span>
+                            </label>
+                            <a href="#">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="btn">Sign In</button>
+                    </form>
+                </div>
+
+                <!-- Signup Tab -->
+                <div id="signup-tab" class="tab-content" style="margin-top: 1.5rem;">
+                    <form onsubmit="handleSignup(event)">
+                        <div class="form-group">
+                            <label for="signup-name">Full Name</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <input type="text" id="signup-name" placeholder="John Doe" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-email">Email</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                                <input type="email" id="signup-email" placeholder="john@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-password">Password</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <input type="password" id="signup-password" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="signup-confirm">Confirm Password</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                                <input type="password" id="signup-confirm" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <div class="terms">
+                            <input type="checkbox" id="terms" required>
+                            <label for="terms" class="terms-text">
+                                I agree to the Terms of Service and Privacy Policy
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            const loginTab = document.getElementById('login-tab');
+            const signupTab = document.getElementById('signup-tab');
+            const buttons = document.querySelectorAll('.tab-button');
+
+            if (tab === 'login') {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                buttons[0].classList.add('active');
+                buttons[1].classList.remove('active');
+            } else {
+                loginTab.classList.remove('active');
+                signupTab.classList.add('active');
+                buttons[0].classList.remove('active');
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault();
+            const loginType = document.getElementById('login-type').value;
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            
+            if (!loginType) {
+                alert('Please select whether you are logging in as Resident or Admin');
+                return;
+            }
+            
+            submitButton.disabled = true;
+            submitButton.textContent = 'Signing in...';
+
+            try {
+                const response = await authAPI.login(email, password);
+                
+                // Verify user role matches selected login type
+                const userRole = response.user?.role || 'member';
+                const expectedRole = loginType === 'admin' ? 'admin' : 'member';
+                
+                if (loginType === 'admin' && userRole !== 'admin') {
+                    alert('Access denied: Admin credentials required');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Sign In';
+                    return;
+                }
+                
+                // Store login type for future reference
+                localStorage.setItem('loginType', loginType);
+                
+                alert('Login successful!');
+                
+                // Redirect based on role
+                if (loginType === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign In';
+            }
+        }
+
+        // Handle signup
+        async function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm').value;
+            const submitButton = event.target.querySelector('button[type="submit"]');
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creating account...';
+
+            try {
+                const response = await authAPI.register(name, email, password);
+                alert('Account created successfully!');
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                alert('Registration failed: ' + error.message);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Create Account';
+            }
+        }
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Check if user is already logged in
+        if (getAuthToken()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+</html>

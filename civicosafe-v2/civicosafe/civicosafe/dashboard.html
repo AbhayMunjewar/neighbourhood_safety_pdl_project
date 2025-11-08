@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Civicosafe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #252525;
+            --card: #ffffff;
+            --border: rgba(0, 0, 0, 0.1);
+            --primary: #030213;
+            --primary-foreground: #ffffff;
+            --muted: #ececf0;
+            --muted-foreground: #717182;
+            --accent: #e9ebef;
+            --destructive: #d4183d;
+            --radius: 0.625rem;
+        }
+
+        .dark {
+            --background: #252525;
+            --foreground: #fafafa;
+            --card: #252525;
+            --border: #454545;
+            --primary: #fafafa;
+            --primary-foreground: #343434;
+            --muted: #454545;
+            --muted-foreground: #b5b5b5;
+            --accent: #454545;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .logo-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--primary);
+        }
+
+        nav {
+            display: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--muted-foreground);
+            transition: color 0.2s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--foreground);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: calc(var(--radius) - 0.25rem);
+            color: var(--foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--muted-foreground);
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--foreground);
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+        }
+
+        .icon {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .icon-lg {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-default {
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .badge-secondary {
+            background: var(--muted);
+            color: var(--foreground);
+        }
+
+        .badge-outline {
+            border: 1px solid var(--border);
+            background: transparent;
+        }
+
+        .incident-item,
+        .alert-item {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .incident-item:last-child,
+        .alert-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .incident-header,
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .incident-type,
+        .alert-title {
+            font-weight: 500;
+        }
+
+        .incident-location,
+        .incident-time,
+        .alert-description {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background: var(--muted);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 9999px;
+            transition: width 0.3s;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            background: var(--muted);
+            padding: 2rem 1rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--muted-foreground);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-section a:hover {
+            color: var(--foreground);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 768px) {
+            nav {
+                display: flex;
+            }
+            
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="dashboard.html" class="logo">
+                <svg class="logo-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span>Civicosafe</span>
+            </a>
+
+            <nav>
+                <a href="dashboard.html" class="active">Dashboard</a>
+                <a href="incidents.html">Incidents</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="members.html">Members</a>
+                <a href="emergency.html">Emergency</a>
+                <a href="admin.html">Admin</a>
+                <a href="about.html">About</a>
+            </nav>
+
+            <div class="header-actions">
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                    <svg class="icon theme-icon-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                    <svg class="icon theme-icon-dark" style="display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <h1>Dashboard</h1>
+            <p class="subtitle">Welcome back! Here's what's happening in your neighborhood.</p>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-4">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Active Members</span>
+                        <svg class="icon-lg" style="color: #3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="total-members">-</div>
+                    <div class="stat-change">
+                        <svg class="icon" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        <span>Active members</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Incidents This Month</span>
+                        <svg class="icon-lg" style="color: #f97316;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="total-incidents">-</div>
+                    <div class="stat-change">
+                        <svg class="icon" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"></path>
+                        </svg>
+                        <span id="recent-incidents-text">Recent incidents</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Active Alerts</span>
+                        <svg class="icon-lg" style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-value" id="active-alerts">-</div>
+                    <div class="stat-change">
+                        <svg class="icon" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        <span>+2 from last month</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Safety Score</span>
+                        <svg class="icon-lg" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-value">94%</div>
+                    <div class="stat-change">
+                        <svg class="icon" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        <span>+3% from last month</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="grid grid-2">
+                <div class="card">
+                    <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Recent Incidents</h2>
+                    <p class="subtitle" style="margin-bottom: 1.5rem;">Latest reported incidents in your area</p>
+
+                    <div id="recent-incidents">
+                        <p style="color: var(--muted-foreground);">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 style="font-size: 1.25rem; margin-bottom: 0.5rem;">Active Alerts</h2>
+                    <p class="subtitle" style="margin-bottom: 1.5rem;">Important community notifications</p>
+
+                    <div id="active-alerts-list">
+                        <p style="color: var(--muted-foreground);">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        <span style="font-weight: 500;">Civicosafe</span>
+                    </div>
+                    <p style="color: var(--muted-foreground); font-size: 0.875rem;">Keeping our community safe together.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="incidents.html">Report Incident</a></li>
+                        <li><a href="alerts.html">Community Alerts</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="members.html">Members Directory</a></li>
+                        <li><a href="emergency.html">Emergency Contacts</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul style="color: var(--muted-foreground); font-size: 0.875rem;">
+                        <li>Email: watch@neighborhood.com</li>
+                        <li>Phone: (555) 123-4567</li>
+                        <li>Emergency: 911</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Civicosafe. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script>
+        // Check authentication
+        if (!getAuthToken()) {
+            window.location.href = 'login.html';
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const lightIcon = document.querySelector('.theme-icon-light');
+            const darkIcon = document.querySelector('.theme-icon-dark');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Load stats
+                const statsResponse = await dashboardAPI.getStats();
+                if (statsResponse.success) {
+                    const stats = statsResponse.data;
+                    document.getElementById('total-members').textContent = stats.totalMembers || 0;
+                    document.getElementById('total-incidents').textContent = stats.totalIncidents || 0;
+                    document.getElementById('active-alerts').textContent = stats.activeAlerts || 0;
+                    document.getElementById('recent-incidents-text').textContent = `${stats.recentIncidents || 0} in last 7 days`;
+                }
+
+                // Load recent incidents
+                const incidentsResponse = await incidentsAPI.getAll();
+                if (incidentsResponse.success) {
+                    const incidents = incidentsResponse.data.slice(0, 3);
+                    const incidentsContainer = document.getElementById('recent-incidents');
+                    if (incidents.length === 0) {
+                        incidentsContainer.innerHTML = '<p style="color: var(--muted-foreground);">No recent incidents</p>';
+                    } else {
+                        incidentsContainer.innerHTML = incidents.map(incident => `
+                            <div class="incident-item">
+                                <div class="incident-header">
+                                    <div>
+                                        <div class="incident-type">${incident.type.replace(/\b\w/g, l => l.toUpperCase())}</div>
+                                        <div class="incident-location">${incident.location}</div>
+                                        <div class="incident-time">${new Date(incident.created_at).toLocaleString()}</div>
+                                    </div>
+                                    <span class="badge badge-default">${incident.status || 'pending'}</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+
+                // Load active alerts
+                const alertsResponse = await alertsAPI.getAll({ status: 'active' });
+                if (alertsResponse.success) {
+                    const alerts = alertsResponse.data.slice(0, 3);
+                    const alertsContainer = document.getElementById('active-alerts-list');
+                    if (alerts.length === 0) {
+                        alertsContainer.innerHTML = '<p style="color: var(--muted-foreground);">No active alerts</p>';
+                    } else {
+                        alertsContainer.innerHTML = alerts.map(alert => `
+                            <div class="alert-item">
+                                <div class="alert-header">
+                                    <div>
+                                        <div class="alert-title">${alert.title}</div>
+                                        <span class="badge badge-default" style="margin-top: 0.25rem;">${alert.priority}</span>
+                                    </div>
+                                </div>
+                                <div class="alert-description">${alert.message}</div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Failed to load dashboard data');
+            }
+        }
+
+        // Initialize dashboard
+        loadDashboard();
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.querySelector('.theme-icon-light').style.display = 'none';
+            document.querySelector('.theme-icon-dark').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

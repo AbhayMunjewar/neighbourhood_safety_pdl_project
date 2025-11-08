@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Alerts - Civicosafe</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --background: #ffffff; --foreground: #252525; --card: #ffffff;
+            --border: rgba(0, 0, 0, 0.1); --primary: #030213; --primary-foreground: #ffffff;
+            --muted: #ececf0; --muted-foreground: #717182; --accent: #e9ebef;
+            --destructive: #d4183d; --radius: 0.625rem;
+        }
+        
+        .dark {
+            --background: #252525; --foreground: #fafafa; --card: #252525;
+            --border: #454545; --primary: #fafafa; --primary-foreground: #343434;
+            --muted: #454545; --muted-foreground: #b5b5b5; --accent: #454545;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background); color: var(--foreground);
+            min-height: 100vh; display: flex; flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        header {
+            position: sticky; top: 0; z-index: 50; background: var(--background);
+            border-bottom: 1px solid var(--border); backdrop-filter: blur(10px);
+        }
+        
+        .header-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 1rem;
+            display: flex; align-items: center; justify-content: space-between; height: 4rem;
+        }
+        
+        .logo { display: flex; align-items: center; gap: 0.5rem; text-decoration: none; color: var(--foreground); font-weight: 500; }
+        nav { display: none; gap: 1.5rem; }
+        nav a { text-decoration: none; color: var(--muted-foreground); transition: color 0.2s; }
+        nav a:hover, nav a.active { color: var(--foreground); }
+        .theme-toggle { background: transparent; border: none; cursor: pointer; padding: 0.5rem; border-radius: calc(var(--radius) - 0.25rem); color: var(--foreground); }
+        .theme-toggle:hover { background: var(--accent); }
+        
+        main { flex: 1; padding: 2rem 1rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 1.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--muted-foreground); margin-bottom: 2rem; }
+        
+        .grid { display: grid; gap: 1.5rem; }
+        .grid-3 { grid-template-columns: 1fr; }
+        
+        .card {
+            background: var(--card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .tabs { margin-bottom: 1.5rem; }
+        .tab-list { display: flex; gap: 0.5rem; background: var(--muted); padding: 0.25rem; border-radius: var(--radius); overflow-x: auto; }
+        .tab-btn {
+            padding: 0.5rem 1rem; border: none; background: transparent; color: var(--muted-foreground);
+            cursor: pointer; border-radius: calc(var(--radius) - 0.25rem); font-weight: 500; white-space: nowrap;
+        }
+        .tab-btn.active { background: var(--background); color: var(--foreground); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .alert-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; transition: box-shadow 0.2s; }
+        .alert-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .alert-header { display: flex; align-items: start; gap: 1rem; }
+        .alert-icon { width: 1.25rem; height: 1.25rem; flex-shrink: 0; margin-top: 0.25rem; }
+        .alert-content { flex: 1; }
+        .alert-title { font-weight: 500; margin-bottom: 0.5rem; }
+        .alert-badges { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+        .alert-description { color: var(--muted-foreground); font-size: 0.875rem; margin-bottom: 0.75rem; }
+        .alert-footer { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--muted-foreground); }
+        
+        .badge {
+            display: inline-block; padding: 0.25rem 0.75rem; border-radius: calc(var(--radius) - 0.25rem);
+            font-size: 0.75rem; font-weight: 500;
+        }
+        .badge-destructive { background: var(--destructive); color: white; }
+        .badge-default { background: var(--primary); color: var(--primary-foreground); }
+        .badge-secondary { background: var(--muted); color: var(--foreground); }
+        .badge-outline { border: 1px solid var(--border); background: transparent; }
+        
+        .btn {
+            padding: 0.625rem 1rem; background: var(--primary); color: var(--primary-foreground);
+            border: none; border-radius: calc(var(--radius) - 0.25rem); font-weight: 500;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; width: 100%;
+            justify-content: center; transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        
+        .stat-item { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+        .stat-item:last-child { margin-bottom: 0; }
+        .stat-label { font-size: 0.875rem; color: var(--muted-foreground); }
+        .stat-value { font-weight: 500; }
+        
+        footer {
+            border-top: 1px solid var(--border); background: var(--muted); padding: 2rem 1rem;
+        }
+        .footer-container { max-width: 1200px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 2rem; }
+        .footer-section h4 { margin-bottom: 0.75rem; }
+        .footer-section ul { list-style: none; }
+        .footer-section li { margin-bottom: 0.5rem; }
+        .footer-section a { color: var(--muted-foreground); text-decoration: none; font-size: 0.875rem; }
+        .footer-section a:hover { color: var(--foreground); }
+        .footer-bottom { text-align: center; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted-foreground); font-size: 0.875rem; }
+        
+        @media (min-width: 768px) {
+            nav { display: flex; }
+            .grid-3 { grid-template-columns: 2fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="dashboard.html" class="logo">
+                <svg style="width: 1.5rem; height: 1.5rem; color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span>Civicosafe</span>
+            </a>
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="incidents.html">Incidents</a>
+                <a href="alerts.html" class="active">Alerts</a>
+                <a href="members.html">Members</a>
+                <a href="emergency.html">Emergency</a>
+                <a href="admin.html">Admin</a>
+                <a href="about.html">About</a>
+            </nav>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <svg class="theme-icon-light" style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                <svg class="theme-icon-dark" style="width: 1.25rem; height: 1.25rem; display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Community Alerts</h1>
+            <p class="subtitle">Stay informed about important updates and notifications in your neighborhood.</p>
+
+            <div class="grid grid-3">
+                <div>
+                    <div class="tabs">
+                        <div class="tab-list">
+                            <button class="tab-btn active" onclick="filterAlerts('all')">All</button>
+                            <button class="tab-btn" onclick="filterAlerts('emergency')">Emergency</button>
+                            <button class="tab-btn" onclick="filterAlerts('safety')">Safety</button>
+                            <button class="tab-btn" onclick="filterAlerts('traffic')">Traffic</button>
+                            <button class="tab-btn" onclick="filterAlerts('community')">Community</button>
+                        </div>
+                    </div>
+
+                    <div id="alerts-container">
+                        <div class="alert-card" data-category="emergency">
+                            <div class="alert-header">
+                                <svg class="alert-icon" style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <div class="alert-content">
+                                    <h3 class="alert-title">Severe Weather Alert</h3>
+                                    <div class="alert-badges">
+                                        <span class="badge badge-destructive">HIGH</span>
+                                        <span class="badge badge-outline">Weather</span>
+                                    </div>
+                                    <p class="alert-description">Heavy storms expected tonight. Secure outdoor items and avoid travel if possible.</p>
+                                    <div class="alert-footer">
+                                        <span>Posted by City Emergency Services</span>
+                                        <span>1 hour ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-card" data-category="safety">
+                            <div class="alert-header">
+                                <svg class="alert-icon" style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <div class="alert-content">
+                                    <h3 class="alert-title">Burglary Alert</h3>
+                                    <div class="alert-badges">
+                                        <span class="badge badge-destructive">HIGH</span>
+                                        <span class="badge badge-outline">Safety</span>
+                                    </div>
+                                    <p class="alert-description">Multiple break-ins reported in the Oak Street area. Ensure all doors and windows are locked.</p>
+                                    <div class="alert-footer">
+                                        <span>Posted by Neighborhood Watch Admin</span>
+                                        <span>3 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-card" data-category="traffic">
+                            <div class="alert-header">
+                                <svg class="alert-icon" style="color: #f97316;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="alert-content">
+                                    <h3 class="alert-title">Road Closure</h3>
+                                    <div class="alert-badges">
+                                        <span class="badge badge-default">MEDIUM</span>
+                                        <span class="badge badge-outline">Traffic</span>
+                                    </div>
+                                    <p class="alert-description">Main Street will be closed between 5th and 7th Ave for maintenance from Oct 23-25.</p>
+                                    <div class="alert-footer">
+                                        <span>Posted by City Planning Dept</span>
+                                        <span>5 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert-card" data-category="community">
+                            <div class="alert-header">
+                                <svg class="alert-icon" style="color: #3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="alert-content">
+                                    <h3 class="alert-title">Community Meeting</h3>
+                                    <div class="alert-badges">
+                                        <span class="badge badge-secondary">LOW</span>
+                                        <span class="badge badge-outline">Event</span>
+                                    </div>
+                                    <p class="alert-description">Monthly neighborhood safety meeting on Oct 24 at 7 PM in the Community Center.</p>
+                                    <div class="alert-footer">
+                                        <span>Posted by Sarah Johnson</span>
+                                        <span>1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">Create Alert</h3>
+                        <p style="color: var(--muted-foreground); font-size: 0.875rem; margin-bottom: 1rem;">Post a new community alert</p>
+                        <button class="btn" onclick="createNewAlert()">
+                            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                            New Alert
+                        </button>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: 1rem;">Alert Statistics</h3>
+                        <div>
+                            <div class="stat-item">
+                                <span class="stat-label">Active Alerts</span>
+                                <span class="stat-value">6</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">High Priority</span>
+                                <span class="stat-value" style="color: var(--destructive);">2</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">This Week</span>
+                                <span class="stat-value">4</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">This Month</span>
+                                <span class="stat-value">12</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        <span style="font-weight: 500;">Civicosafe</span>
+                    </div>
+                    <p style="color: var(--muted-foreground); font-size: 0.875rem;">Keeping our community safe together.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="incidents.html">Report Incident</a></li>
+                        <li><a href="alerts.html">Community Alerts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="members.html">Members Directory</a></li>
+                        <li><a href="emergency.html">Emergency Contacts</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul style="color: var(--muted-foreground); font-size: 0.875rem;">
+                        <li>Email: watch@neighborhood.com</li>
+                        <li>Phone: (555) 123-4567</li>
+                        <li>Emergency: 911</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Civicosafe. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const lightIcon = document.querySelector('.theme-icon-light');
+            const darkIcon = document.querySelector('.theme-icon-dark');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            }
+        }
+
+        function filterAlerts(category) {
+            const alerts = document.querySelectorAll('.alert-card');
+            const buttons = document.querySelectorAll('.tab-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+            
+            alerts.forEach(alert => {
+                if (category === 'all' || alert.dataset.category === category) {
+                    alert.style.display = 'block';
+                } else {
+                    alert.style.display = 'none';
+                }
+            });
+        }
+
+        function createNewAlert() {
+            alert('Create New Alert\n\nThis feature will open a form to create a new community alert. You can specify:\n- Alert type (Emergency, Safety, Traffic, Community)\n- Priority level\n- Message content\n- Duration');
+        }
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.querySelector('.theme-icon-light').style.display = 'none';
+            document.querySelector('.theme-icon-dark').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

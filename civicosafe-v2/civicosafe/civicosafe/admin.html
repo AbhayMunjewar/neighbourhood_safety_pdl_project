@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel - Civicosafe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #252525;
+            --card: #ffffff;
+            --border: rgba(0, 0, 0, 0.1);
+            --primary: #030213;
+            --primary-foreground: #ffffff;
+            --muted: #ececf0;
+            --muted-foreground: #717182;
+            --accent: #e9ebef;
+            --destructive: #d4183d;
+            --input-background: #f3f3f5;
+            --radius: 0.625rem;
+        }
+
+        .dark {
+            --background: #252525;
+            --foreground: #fafafa;
+            --card: #252525;
+            --border: #454545;
+            --primary: #fafafa;
+            --primary-foreground: #343434;
+            --muted: #454545;
+            --muted-foreground: #b5b5b5;
+            --accent: #454545;
+            --input-background: #454545;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        nav {
+            display: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--muted-foreground);
+            transition: color 0.2s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--foreground);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: calc(var(--radius) - 0.25rem);
+            color: var(--foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            color: var(--muted-foreground);
+            margin-bottom: 2rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            margin-bottom: 2rem;
+        }
+
+        .tab-list {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-button {
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--muted-foreground);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--foreground);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-button:hover {
+            color: var(--foreground);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: 1fr;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.125rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+
+        /* Stats */
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 2rem;
+            height: 2rem;
+            flex-shrink: 0;
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-default {
+            background: var(--primary);
+            color: var(--primary-foreground);
+        }
+
+        .badge-secondary {
+            background: var(--muted);
+            color: var(--foreground);
+        }
+
+        .badge-outline {
+            border: 1px solid var(--border);
+            background: transparent;
+        }
+
+        .badge-success {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Button */
+        .btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-weight: 500;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--foreground);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        /* Approval Item */
+        .approval-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .approval-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .approval-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .approval-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .approval-meta {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Activity Item */
+        .activity-item {
+            display: flex;
+            gap: 0.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .activity-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: var(--primary);
+            margin-top: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-user {
+            font-weight: 500;
+        }
+
+        .activity-action {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .activity-time {
+            font-size: 0.75rem;
+            color: var(--muted-foreground);
+            margin-top: 0.25rem;
+        }
+
+        /* System Status */
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-label {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        .status-value {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Quick Actions Grid */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .action-btn {
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--card);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+        }
+
+        .action-icon {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* User Management */
+        .user-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+        }
+
+        .user-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: rgba(3, 2, 19, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .dark .user-avatar {
+            background: rgba(250, 250, 250, 0.1);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-role {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        /* Settings */
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+        }
+
+        .setting-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-label {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .setting-description {
+            font-size: 0.875rem;
+            color: var(--muted-foreground);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 2.75rem;
+            height: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--muted);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.125rem;
+            width: 1.125rem;
+            left: 0.1875rem;
+            bottom: 0.1875rem;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(1.25rem);
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            background: var(--muted);
+            padding: 2rem 1rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--muted-foreground);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .footer-section a:hover {
+            color: var(--foreground);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 768px) {
+            nav {
+                display: flex;
+            }
+            
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="dashboard.html" class="logo">
+                <svg style="width: 1.5rem; height: 1.5rem; color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span>Civicosafe</span>
+            </a>
+
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="incidents.html">Incidents</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="members.html">Members</a>
+                <a href="emergency.html">Emergency</a>
+                <a href="admin.html" class="active">Admin</a>
+                <a href="about.html">About</a>
+            </nav>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <svg class="theme-icon-light" style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                <svg class="theme-icon-dark" style="width: 1.25rem; height: 1.25rem; display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <h1>Admin Control Panel</h1>
+            <p class="subtitle">Manage community settings, users, and system configuration.</p>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab-list">
+                    <button class="tab-button active" onclick="switchTab('overview')">Overview</button>
+                    <button class="tab-button" onclick="switchTab('users')">Users</button>
+                    <button class="tab-button" onclick="switchTab('incidents')">Incidents</button>
+                    <button class="tab-button" onclick="switchTab('alerts')">Alerts</button>
+                    <button class="tab-button" onclick="switchTab('settings')">Settings</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div id="overview-tab" class="tab-content active">
+                    <!-- Quick Stats -->
+                    <div class="grid grid-4">
+                        <div class="card">
+                            <div class="stat-card">
+                                <svg class="stat-icon" style="color: #3b82f6;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <div>
+                                    <div class="stat-value">248</div>
+                                    <p class="stat-label">Total Users</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="stat-card">
+                                <svg class="stat-icon" style="color: #f97316;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <div>
+                                    <div class="stat-value">23</div>
+                                    <p class="stat-label">Open Incidents</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="stat-card">
+                                <svg class="stat-icon" style="color: #ef4444;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <div>
+                                    <div class="stat-value">6</div>
+                                    <p class="stat-label">Active Alerts</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="stat-card">
+                                <svg class="stat-icon" style="color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <div>
+                                    <div class="stat-value">94%</div>
+                                    <p class="stat-label">Safety Score</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <!-- Pending Approvals -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Pending Approvals</h2>
+                                <p class="card-description">Items requiring your attention</p>
+                            </div>
+
+                            <div class="approval-item">
+                                <div class="approval-info">
+                                    <p class="approval-name">Jane Smith</p>
+                                    <p class="approval-meta">New Member • 2 hours ago</p>
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="handleApproval(this, 'reject')">Reject</button>
+                                    <button class="btn btn-sm" onclick="handleApproval(this, 'approve')">Approve</button>
+                                </div>
+                            </div>
+
+                            <div class="approval-item">
+                                <div class="approval-info">
+                                    <p class="approval-name">Tom Brown</p>
+                                    <p class="approval-meta">New Member • 5 hours ago</p>
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="handleApproval(this, 'reject')">Reject</button>
+                                    <button class="btn btn-sm" onclick="handleApproval(this, 'approve')">Approve</button>
+                                </div>
+                            </div>
+
+                            <div class="approval-item">
+                                <div class="approval-info">
+                                    <p class="approval-name">Alert: Construction</p>
+                                    <p class="approval-meta">Community Alert • 1 day ago</p>
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn btn-outline btn-sm" onclick="handleApproval(this, 'reject')">Reject</button>
+                                    <button class="btn btn-sm" onclick="handleApproval(this, 'approve')">Approve</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Recent Activity</h2>
+                                <p class="card-description">Latest community actions</p>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-dot"></div>
+                                <div class="activity-content">
+                                    <p class="activity-user">Sarah Johnson</p>
+                                    <p class="activity-action">Created alert - Road Closure</p>
+                                    <p class="activity-time">30 min ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-dot"></div>
+                                <div class="activity-content">
+                                    <p class="activity-user">Mike Thompson</p>
+                                    <p class="activity-action">Reported incident - Suspicious Activity</p>
+                                    <p class="activity-time">1 hour ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-dot"></div>
+                                <div class="activity-content">
+                                    <p class="activity-user">Emily Davis</p>
+                                    <p class="activity-action">Joined community - New member</p>
+                                    <p class="activity-time">2 hours ago</p>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-dot"></div>
+                                <div class="activity-content">
+                                    <p class="activity-user">John Wilson</p>
+                                    <p class="activity-action">Updated profile - Contact info</p>
+                                    <p class="activity-time">3 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Status -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">System Status</h2>
+                                <p class="card-description">Platform health metrics</p>
+                            </div>
+
+                            <div class="status-item">
+                                <span class="status-label">Database Size</span>
+                                <div class="status-value">
+                                    <span style="font-weight: 500;">245 MB</span>
+                                    <span class="badge badge-outline">normal</span>
+                                </div>
+                            </div>
+
+                            <div class="status-item">
+                                <span class="status-label">Active Sessions</span>
+                                <div class="status-value">
+                                    <span style="font-weight: 500;">42</span>
+                                    <span class="badge badge-outline">normal</span>
+                                </div>
+                            </div>
+
+                            <div class="status-item">
+                                <span class="status-label">Response Time</span>
+                                <div class="status-value">
+                                    <span style="font-weight: 500;">124 ms</span>
+                                    <span class="badge badge-success">good</span>
+                                </div>
+                            </div>
+
+                            <div class="status-item">
+                                <span class="status-label">Uptime</span>
+                                <div class="status-value">
+                                    <span style="font-weight: 500;">99.8%</span>
+                                    <span class="badge badge-success">excellent</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h2 class="card-title">Quick Actions</h2>
+                                <p class="card-description">Common administrative tasks</p>
+                            </div>
+
+                            <div class="actions-grid">
+                                <button class="action-btn" onclick="generateReport()">
+                                    <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p class="action-label">Generate Report</p>
+                                </button>
+
+                                <button class="action-btn" onclick="exportData()">
+                                    <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <p class="action-label">Export Data</p>
+                                </button>
+
+                                <button class="action-btn" onclick="switchTab('users')">
+                                    <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                    <p class="action-label">Manage Users</p>
+                                </button>
+
+                                <button class="action-btn" onclick="switchTab('settings')">
+                                    <svg class="action-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <p class="action-label">System Settings</p>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Tab -->
+                <div id="users-tab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">User Management</h2>
+                            <p class="card-description">Manage community members and permissions</p>
+                        </div>
+
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-avatar">SJ</div>
+                                <div>
+                                    <p class="user-name">Sarah Johnson</p>
+                                    <p class="user-role">Admin</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="editUserPermissions(this)">Edit Permissions</button>
+                        </div>
+
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-avatar">MT</div>
+                                <div>
+                                    <p class="user-name">Mike Thompson</p>
+                                    <p class="user-role">Block Captain</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="editUserPermissions(this)">Edit Permissions</button>
+                        </div>
+
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-avatar">ED</div>
+                                <div>
+                                    <p class="user-name">Emily Davis</p>
+                                    <p class="user-role">Member</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="editUserPermissions(this)">Edit Permissions</button>
+                        </div>
+
+                        <div class="user-item">
+                            <div class="user-info">
+                                <div class="user-avatar">JW</div>
+                                <div>
+                                    <p class="user-name">John Wilson</p>
+                                    <p class="user-role">Block Captain</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline btn-sm" onclick="editUserPermissions(this)">Edit Permissions</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incidents Tab -->
+                <div id="incidents-tab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Incident Management</h2>
+                            <p class="card-description">Review and manage reported incidents</p>
+                        </div>
+                        <p style="color: var(--muted-foreground); padding: 2rem; text-align: center;">
+                            Incident management interface - View, review, and resolve reported incidents.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Alerts Tab -->
+                <div id="alerts-tab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Alert Management</h2>
+                            <p class="card-description">Create and manage community alerts</p>
+                        </div>
+                        <p style="color: var(--muted-foreground); padding: 2rem; text-align: center;">
+                            Alert management interface - Create, edit, and moderate community alerts.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings-tab" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">System Settings</h2>
+                            <p class="card-description">Configure platform preferences</p>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <p class="setting-label">Email Notifications</p>
+                                <p class="setting-description">Send email alerts to members</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <p class="setting-label">Auto-approve Members</p>
+                                <p class="setting-description">Automatically approve new registrations</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <p class="setting-label">Public Incident Reports</p>
+                                <p class="setting-description">Make incidents visible to all members</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <p class="setting-label">Maintenance Mode</p>
+                                <p class="setting-description">Disable public access temporarily</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <p class="setting-label">Allow Anonymous Reports</p>
+                                <p class="setting-description">Enable anonymous incident reporting</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        <span style="font-weight: 500;">Civicosafe</span>
+                    </div>
+                    <p style="color: var(--muted-foreground); font-size: 0.875rem;">Keeping our community safe together.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="incidents.html">Report Incident</a></li>
+                        <li><a href="alerts.html">Community Alerts</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="members.html">Members Directory</a></li>
+                        <li><a href="emergency.html">Emergency Contacts</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul style="color: var(--muted-foreground); font-size: 0.875rem;">
+                        <li>Email: watch@neighborhood.com</li>
+                        <li>Phone: (555) 123-4567</li>
+                        <li>Emergency: 911</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Civicosafe. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const lightIcon = document.querySelector('.theme-icon-light');
+            const darkIcon = document.querySelector('.theme-icon-dark');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Remove active class from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab content
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Add active class to clicked button
+            const clickedButton = event && event.target ? event.target : document.querySelector(`[onclick*="${tabName}"]`);
+            if (clickedButton && clickedButton.classList.contains('tab-button')) {
+                clickedButton.classList.add('active');
+            }
+        }
+
+        // Handle approval actions
+        function handleApproval(button, action) {
+            const approvalItem = button.closest('.approval-item');
+            const name = approvalItem.querySelector('.approval-name').textContent;
+            
+            if (action === 'approve') {
+                alert(`Approved: ${name}`);
+                approvalItem.style.opacity = '0.5';
+                approvalItem.style.pointerEvents = 'none';
+            } else {
+                if (confirm(`Are you sure you want to reject: ${name}?`)) {
+                    alert(`Rejected: ${name}`);
+                    approvalItem.style.opacity = '0.5';
+                    approvalItem.style.pointerEvents = 'none';
+                }
+            }
+        }
+
+        // Generate report
+        function generateReport() {
+            alert('Generating report... This feature will download a comprehensive report of all community data.');
+        }
+
+        // Export data
+        function exportData() {
+            alert('Exporting data... This feature will download all community data in CSV format.');
+        }
+
+        // Edit user permissions
+        function editUserPermissions(button) {
+            const userItem = button.closest('.user-item');
+            const userName = userItem.querySelector('.user-name').textContent;
+            alert(`Editing permissions for: ${userName}\n\nThis feature will open a permissions management interface.`);
+        }
+
+        // Check for saved theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.querySelector('.theme-icon-light').style.display = 'none';
+            document.querySelector('.theme-icon-dark').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

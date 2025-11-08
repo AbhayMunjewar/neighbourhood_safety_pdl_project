@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Incident - Civicosafe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #ffffff;
+            --foreground: #252525;
+            --card: #ffffff;
+            --border: rgba(0, 0, 0, 0.1);
+            --primary: #030213;
+            --primary-foreground: #ffffff;
+            --muted: #ececf0;
+            --muted-foreground: #717182;
+            --accent: #e9ebef;
+            --destructive: #d4183d;
+            --input-background: #f3f3f5;
+            --radius: 0.625rem;
+        }
+
+        .dark {
+            --background: #252525;
+            --foreground: #fafafa;
+            --card: #252525;
+            --border: #454545;
+            --primary: #fafafa;
+            --primary-foreground: #343434;
+            --muted: #454545;
+            --muted-foreground: #b5b5b5;
+            --accent: #454545;
+            --input-background: #454545;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--background);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        nav {
+            display: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--muted-foreground);
+            transition: color 0.2s;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--foreground);
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: calc(var(--radius) - 0.25rem);
+            color: var(--foreground);
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--muted-foreground);
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-description {
+            color: var(--muted-foreground);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            background: var(--input-background);
+            border: 1px solid var(--border);
+            border-radius: calc(var(--radius) - 0.25rem);
+            color: var(--foreground);
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: var(--muted-foreground);
+        }
+
+        .input-with-icon {
+            padding-left: 2.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1rem;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            border: none;
+            border-radius: calc(var(--radius) - 0.25rem);
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--foreground);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn-full {
+            flex: 1;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(212, 24, 61, 0.1);
+            border: 1px solid var(--destructive);
+            border-radius: var(--radius);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .alert-icon {
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: rgba(212, 24, 61, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alert-content h3 {
+            color: var(--destructive);
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            background: var(--muted);
+            padding: 2rem 1rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--muted-foreground);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .footer-section a:hover {
+            color: var(--foreground);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted-foreground);
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 768px) {
+            nav {
+                display: flex;
+            }
+            
+            .grid-2 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="dashboard.html" class="logo">
+                <svg style="width: 1.5rem; height: 1.5rem; color: var(--primary);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+                <span>Civicosafe</span>
+            </a>
+
+            <nav>
+                <a href="dashboard.html">Dashboard</a>
+                <a href="incidents.html" class="active">Incidents</a>
+                <a href="alerts.html">Alerts</a>
+                <a href="members.html">Members</a>
+                <a href="emergency.html">Emergency</a>
+                <a href="admin.html">Admin</a>
+                <a href="about.html">About</a>
+            </nav>
+
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <svg class="theme-icon-light" style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+                <svg class="theme-icon-dark" style="width: 1.25rem; height: 1.25rem; display: none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <h1>Report an Incident</h1>
+            <p class="subtitle">Help keep our community safe by reporting incidents or suspicious activity.</p>
+
+            <div class="card">
+                <h2 class="card-title">Incident Details</h2>
+                <p class="card-description">Please provide as much information as possible about the incident.</p>
+
+                <form onsubmit="handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="incident-type">Incident Type *</label>
+                        <select id="incident-type" required>
+                            <option value="">Select incident type</option>
+                            <option value="suspicious">Suspicious Activity</option>
+                            <option value="vandalism">Vandalism</option>
+                            <option value="theft">Theft</option>
+                            <option value="noise">Noise Complaint</option>
+                            <option value="traffic">Traffic Issue</option>
+                            <option value="safety">Safety Concern</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location *</label>
+                        <div class="input-wrapper">
+                            <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <input type="text" id="location" class="input-with-icon" placeholder="Street address or intersection" required>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="date">Date *</label>
+                            <div class="input-wrapper">
+                                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                <input type="date" id="date" class="input-with-icon" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="time">Time *</label>
+                            <input type="time" id="time" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="severity">Severity Level *</label>
+                        <select id="severity" required>
+                            <option value="">Select severity</option>
+                            <option value="low">Low - Minor concern</option>
+                            <option value="medium">Medium - Needs attention</option>
+                            <option value="high">High - Urgent matter</option>
+                            <option value="critical">Critical - Immediate threat</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" rows="5" placeholder="Provide detailed description of what happened..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="witnesses">Witnesses</label>
+                        <input type="text" id="witnesses" placeholder="Names or number of witnesses (optional)">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label for="reporter-name">Your Name *</label>
+                            <input type="text" id="reporter-name" placeholder="John Doe" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reporter-phone">Phone Number *</label>
+                            <input type="tel" id="reporter-phone" placeholder="(555) 123-4567" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="evidence">Evidence (Photos/Videos)</label>
+                        <input type="file" id="evidence" accept="image/*,video/*" multiple>
+                        <p style="font-size: 0.75rem; color: var(--muted-foreground); margin-top: 0.5rem;">
+                            Upload any relevant photos or videos (max 10MB per file)
+                        </p>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="anonymous">
+                            <span>Submit this report anonymously</span>
+                        </label>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-full">
+                            <svg style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                            Submit Report
+                        </button>
+                        <button type="button" class="btn btn-outline" onclick="saveAsDraft()">Save as Draft</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="alert-box">
+                <div class="alert-icon">
+                    <span style="font-size: 1.5rem;">⚠️</span>
+                </div>
+                <div class="alert-content">
+                    <h3>Emergency Situations</h3>
+                    <p style="font-size: 0.875rem; color: var(--muted-foreground);">
+                        If you are witnessing a crime in progress or there is immediate danger,
+                        please call 911 immediately. Do not wait to file a report here.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <svg style="width: 1.25rem; height: 1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        <span style="font-weight: 500;">Civicosafe</span>
+                    </div>
+                    <p style="color: var(--muted-foreground); font-size: 0.875rem;">Keeping our community safe together.</p>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="incidents.html">Report Incident</a></li>
+                        <li><a href="alerts.html">Community Alerts</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="members.html">Members Directory</a></li>
+                        <li><a href="emergency.html">Emergency Contacts</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul style="color: var(--muted-foreground); font-size: 0.875rem;">
+                        <li>Email: watch@neighborhood.com</li>
+                        <li>Phone: (555) 123-4567</li>
+                        <li>Emergency: 911</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Civicosafe. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="api.js"></script>
+    <script>
+        // Check authentication on page load
+        if (!getAuthToken()) {
+            alert('Please login to access this page');
+            window.location.href = 'login.html';
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const lightIcon = document.querySelector('.theme-icon-light');
+            const darkIcon = document.querySelector('.theme-icon-dark');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                lightIcon.style.display = 'block';
+                darkIcon.style.display = 'none';
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                lightIcon.style.display = 'none';
+                darkIcon.style.display = 'block';
+            }
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            
+            // Check if user is logged in
+            if (!getAuthToken()) {
+                alert('Please login to report an incident');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Submitting...';
+
+            const incidentData = {
+                type: document.getElementById('incident-type').value,
+                location: document.getElementById('location').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                severity: document.getElementById('severity').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                console.log('Submitting incident:', incidentData);
+                const response = await incidentsAPI.create(incidentData);
+                console.log('Response received:', response);
+                
+                if (response.success) {
+                    alert('Incident reported successfully!');
+                    event.target.reset();
+                    // Clear any saved draft
+                    localStorage.removeItem('draftIncident');
+                } else {
+                    throw new Error(response.message || 'Failed to submit incident');
+                }
+            } catch (error) {
+                console.error('Submit error:', error);
+                let errorMessage = 'Failed to submit incident: ' + error.message;
+                
+                // Provide specific help based on error
+                if (error.message.includes('connect to server')) {
+                    errorMessage += '\n\nPlease check:\n1. Backend server is running on http://localhost:3000\n2. No firewall is blocking the connection';
+                } else if (error.message.includes('token')) {
+                    errorMessage += '\n\nPlease login again to get a new token.';
+                } else if (error.message.includes('CORS')) {
+                    errorMessage += '\n\nCORS error - make sure backend CORS is configured correctly.';
+                }
+                
+                alert(errorMessage);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            }
+        }
+
+        // Save as draft
+        function saveAsDraft() {
+            const formData = {
+                type: document.getElementById('incident-type').value,
+                location: document.getElementById('location').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                severity: document.getElementById('severity').value,
+                description: document.getElementById('description').value
+            };
+            
+            localStorage.setItem('draftIncident', JSON.stringify(formData));
+            alert('Incident saved as draft! You can complete and submit it later.');
+        }
+
+        // Check for saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.querySelector('.theme-icon-light').style.display = 'none';
+            document.querySelector('.theme-icon-dark').style.display = 'block';
+        }
+
+        // Load draft if exists
+        const draftData = localStorage.getItem('draftIncident');
+        if (draftData) {
+            try {
+                const draft = JSON.parse(draftData);
+                if (draft.type) document.getElementById('incident-type').value = draft.type;
+                if (draft.location) document.getElementById('location').value = draft.location;
+                if (draft.date) document.getElementById('date').value = draft.date;
+                if (draft.time) document.getElementById('time').value = draft.time;
+                if (draft.severity) document.getElementById('severity').value = draft.severity;
+                if (draft.description) document.getElementById('description').value = draft.description;
+            } catch (e) {
+                console.error('Error loading draft:', e);
+            }
+        }
+    </script>
+</body>
+</html>

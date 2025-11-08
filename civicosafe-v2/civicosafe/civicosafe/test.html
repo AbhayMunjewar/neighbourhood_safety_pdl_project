@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - api.js</title>
+</head>
+<body>
+    <h1>Testing api.js Loading</h1>
+    <p>Check the browser console (F12) to see if api.js loads correctly.</p>
+    
+    <script src="api.js"></script>
+    <script>
+        console.log('Test page loaded');
+        if (typeof API_BASE_URL !== 'undefined') {
+            console.log('✅ api.js loaded successfully!');
+            console.log('API Base URL:', API_BASE_URL);
+            document.body.innerHTML += '<p style="color: green;">✅ api.js loaded successfully!</p>';
+        } else {
+            console.error('❌ api.js NOT loaded!');
+            document.body.innerHTML += '<p style="color: red;">❌ api.js NOT loaded!</p>';
+        }
+    </script>
+</body>
+</html>
+
